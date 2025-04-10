@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import TabBar from "@/components/TabBar";
@@ -10,7 +10,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { PlusIcon, BookmarkIcon } from "lucide-react";
+import { PlusIcon, BookmarkIcon, Music, Bot, User } from "lucide-react";
 import type { Tab, Bookmark, Section } from "@shared/schema";
 
 export default function Home() {
@@ -20,6 +20,63 @@ export default function Home() {
   const [addingBookmark, setAddingBookmark] = useState<boolean>(false);
   const [autoRunEnabled, setAutoRunEnabled] = useState<boolean>(false);
   const [previewWebsite, setPreviewWebsite] = useState<string | null>(null);
+  
+  // State for musical bubbles
+  const [bubblesActive, setBubblesActive] = useState<boolean>(false);
+  const [bubbles, setBubbles] = useState<{id: number; x: number; y: number; size: number; color: string; popped: boolean}[]>([]);
+  
+  // State for AI workers
+  const [workersActive, setWorkersActive] = useState<boolean>(false);
+  
+  // Generate musical bubbles
+  useEffect(() => {
+    if (!bubblesActive) return;
+    
+    const intervalId = setInterval(() => {
+      const newBubble = {
+        id: Date.now(),
+        x: Math.random() * 100,
+        y: 110, // Start below the screen
+        size: 20 + Math.random() * 50,
+        color: `hsl(${Math.random() * 360}, 80%, 70%)`,
+        popped: false
+      };
+      
+      setBubbles(prev => [...prev.slice(-15), newBubble]); // Keep only last 15 bubbles for performance
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
+  }, [bubblesActive]);
+  
+  // Animate bubbles moving upward
+  useEffect(() => {
+    if (!bubblesActive || bubbles.length === 0) return;
+    
+    const animationId = setInterval(() => {
+      setBubbles(prev => 
+        prev.map(bubble => ({
+          ...bubble,
+          y: bubble.y - 1 // Move upward
+        })).filter(bubble => bubble.y > -20 && !bubble.popped) // Remove bubbles that are off-screen or popped
+      );
+    }, 50);
+    
+    return () => clearInterval(animationId);
+  }, [bubblesActive, bubbles.length]);
+  
+  // Pop a bubble and play sound
+  const popBubble = (id: number) => {
+    // Play pop sound
+    const audio = new Audio();
+    audio.src = `data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAAeAAA7mgBVVVVVVVVVVVVVVVVVVVWqqqqqqqqqqqqqqqqqqqrV1dXV1dXV1dXV1dXV1dXq6urq6urq6urq6urq6ur///////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAcaAAAAAAAAO5qoCXgWAAAAAP/7kGQAD/AAAGkAAAAIAAANIAAAAQAAAaQAAAAgAAA0gAAABExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=`;
+    audio.play();
+    
+    setBubbles(prev => 
+      prev.map(bubble => 
+        bubble.id === id ? {...bubble, popped: true} : bubble
+      )
+    );
+  };
 
   // Fetch settings
   const { data: settings } = useQuery({
@@ -154,6 +211,26 @@ export default function Home() {
         style={{ backgroundImage: `url(${backgroundImage})` }}
       />
       
+      {/* Musical bubbles */}
+      {bubblesActive && bubbles.map((bubble) => (
+        <div
+          key={bubble.id}
+          className="fixed rounded-full cursor-pointer transition-transform z-[15]"
+          style={{
+            left: `${bubble.x}%`,
+            top: `${bubble.y}%`,
+            width: `${bubble.size}px`,
+            height: `${bubble.size}px`,
+            background: `radial-gradient(circle at 30% 30%, white, ${bubble.color})`,
+            boxShadow: '0 0 10px rgba(255, 255, 255, 0.5)',
+            transform: `scale(${bubble.popped ? 0 : 1})`,
+            transition: 'transform 0.2s ease-out',
+            opacity: bubble.popped ? 0 : 0.8
+          }}
+          onClick={() => popBubble(bubble.id)}
+        />
+      ))}
+      
       {/* New cartoon theme banner at the very top */}
       <div className="relative bg-gradient-to-r from-primary to-amber-500 py-2 text-white text-center z-10">
         <div className="container mx-auto px-4 flex items-center justify-center">
@@ -176,7 +253,29 @@ export default function Home() {
           <h1 className="font-bold text-2xl text-primary">Cartoon Bookmarker</h1>
         </div>
         
-        <div className="flex space-x-4 items-center">
+        <div className="flex space-x-3 items-center">
+          {/* Musical Bubbles button */}
+          <Button 
+            variant={bubblesActive ? "default" : "outline"}
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => setBubblesActive(!bubblesActive)}
+          >
+            <Music className="h-4 w-4" />
+            <span className="text-xs">Bubbles</span>
+          </Button>
+          
+          {/* AI Workers button */}
+          <Button 
+            variant={workersActive ? "default" : "outline"}
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => setWorkersActive(!workersActive)}
+          >
+            <User className="h-4 w-4" />
+            <span className="text-xs">Workers</span>
+          </Button>
+          
           <ThemeToggle />
           
           {/* Auto-run toggle */}
