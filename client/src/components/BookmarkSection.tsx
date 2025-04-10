@@ -264,8 +264,8 @@ export default function BookmarkSection({
         
         <div 
           ref={bookmarkContainerRef}
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-x-auto pb-4 scrollbar-hide"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="flex flex-nowrap gap-4 overflow-x-auto pb-4 scrollbar-hide max-h-none"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', scrollSnapType: 'x mandatory' }}
         >
           {bookmarks.map((bookmark) => (
             <BookmarkCard 

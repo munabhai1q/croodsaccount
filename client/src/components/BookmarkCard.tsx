@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useQueryClient } from "@tanstack/react-query";
-import { ExternalLinkIcon, Edit2Icon, Trash2Icon } from "lucide-react";
+import { ExternalLinkIcon, Edit2Icon, Trash2Icon, MaximizeIcon, MinimizeIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { getFaviconUrl, extractDomain } from "@/lib/faviconHelper";
 import type { Bookmark } from "@shared/schema";
 
 interface BookmarkCardProps {
