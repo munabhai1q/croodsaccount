@@ -173,10 +173,32 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
   
   // Pop a bubble and play sound
   const popBubble = (id: number) => {
-    // Play pop sound
-    const audio = new Audio();
-    audio.src = `data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAAeAAA7mgBVVVVVVVVVVVVVVVVVVVWqqqqqqqqqqqqqqqqqqqrV1dXV1dXV1dXV1dXV1dXq6urq6urq6urq6urq6ur///////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAcaAAAAAAAAO5qoCXgWAAAAAP/7kGQAD/AAAGkAAAAIAAANIAAAAQAAAaQAAAAgAAA0gAAABExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=`;
-    audio.play();
+    try {
+      // Using a simple beep sound that works in all browsers
+      const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = context.createOscillator();
+      oscillator.type = 'sine';
+      
+      // Random frequency for fun bubble sounds
+      oscillator.frequency.setValueAtTime(
+        300 + Math.random() * 500, 
+        context.currentTime
+      );
+      
+      const gainNode = context.createGain();
+      gainNode.gain.setValueAtTime(0.1, context.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.3);
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(context.destination);
+      
+      oscillator.start();
+      oscillator.stop(context.currentTime + 0.3);
+      
+      console.log('Playing bubble pop sound');
+    } catch (error) {
+      console.error('Audio failed to play:', error);
+    }
     
     setBubbles(prev => 
       prev.map(bubble => 
@@ -230,6 +252,81 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
     // Create intervals for each worker action
     const actionIntervals: NodeJS.Timeout[] = [];
     
+    // Add visual indicators of workers (animated avatars)
+    const workerAvatars: HTMLElement[] = [];
+    
+    // Create worker avatars
+    const createWorkerAvatars = () => {
+      const runningWebsites = openWebsites.filter(site => site.state === 'running');
+      runningWebsites.forEach(website => {
+        const iframe = document.getElementById(website.id) as HTMLIFrameElement;
+        if (iframe && iframe.parentElement) {
+          // Create worker clicker avatar
+          const clickerAvatar = document.createElement('div');
+          clickerAvatar.className = 'ai-worker-avatar clicker';
+          clickerAvatar.style.position = 'absolute';
+          clickerAvatar.style.width = '40px';
+          clickerAvatar.style.height = '40px';
+          clickerAvatar.style.borderRadius = '50%';
+          clickerAvatar.style.backgroundColor = 'rgba(255, 192, 0, 0.8)';
+          clickerAvatar.style.boxShadow = '0 0 10px rgba(255, 192, 0, 0.6)';
+          clickerAvatar.style.zIndex = '500';
+          clickerAvatar.style.display = 'flex';
+          clickerAvatar.style.alignItems = 'center';
+          clickerAvatar.style.justifyContent = 'center';
+          clickerAvatar.style.color = 'white';
+          clickerAvatar.style.fontWeight = 'bold';
+          clickerAvatar.style.fontSize = '20px';
+          clickerAvatar.style.transition = 'all 0.5s ease';
+          clickerAvatar.style.cursor = 'pointer';
+          clickerAvatar.style.right = '20px';
+          clickerAvatar.style.top = '50px';
+          clickerAvatar.title = 'AI Clicker Worker';
+          clickerAvatar.innerHTML = '🖱️';
+          clickerAvatar.dataset.website = website.id;
+          
+          // Create worker scroller avatar
+          const scrollerAvatar = document.createElement('div');
+          scrollerAvatar.className = 'ai-worker-avatar scroller';
+          scrollerAvatar.style.position = 'absolute';
+          scrollerAvatar.style.width = '40px';
+          scrollerAvatar.style.height = '40px';
+          scrollerAvatar.style.borderRadius = '50%';
+          scrollerAvatar.style.backgroundColor = 'rgba(0, 120, 255, 0.8)';
+          scrollerAvatar.style.boxShadow = '0 0 10px rgba(0, 120, 255, 0.6)';
+          scrollerAvatar.style.zIndex = '500';
+          scrollerAvatar.style.display = 'flex';
+          scrollerAvatar.style.alignItems = 'center';
+          scrollerAvatar.style.justifyContent = 'center';
+          scrollerAvatar.style.color = 'white';
+          scrollerAvatar.style.fontWeight = 'bold';
+          scrollerAvatar.style.fontSize = '20px';
+          scrollerAvatar.style.transition = 'all 0.5s ease';
+          scrollerAvatar.style.cursor = 'pointer';
+          scrollerAvatar.style.right = '70px';
+          scrollerAvatar.style.top = '50px';
+          scrollerAvatar.title = 'AI Scroll Worker';
+          scrollerAvatar.innerHTML = '📜';
+          scrollerAvatar.dataset.website = website.id;
+          
+          // Add avatars to the parent container
+          iframe.parentElement.appendChild(clickerAvatar);
+          iframe.parentElement.appendChild(scrollerAvatar);
+          
+          // Store for cleanup
+          workerAvatars.push(clickerAvatar);
+          workerAvatars.push(scrollerAvatar);
+        }
+      });
+    };
+    
+    // Initial creation of worker avatars
+    createWorkerAvatars();
+    
+    // Update avatars when websites change
+    const intervalId = setInterval(createWorkerAvatars, 2000);
+    actionIntervals.push(intervalId);
+    
     // Worker 1: Clicks random elements in iframes every 5 seconds
     const clickerInterval = setInterval(() => {
       const runningWebsites = openWebsites.filter(site => site.state === 'running');
@@ -237,6 +334,26 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
       
       const randomSite = runningWebsites[Math.floor(Math.random() * runningWebsites.length)];
       const iframe = document.getElementById(randomSite.id) as HTMLIFrameElement;
+      
+      // Animate the clicker avatar
+      const clickerAvatars = document.querySelectorAll(`.ai-worker-avatar.clicker[data-website="${randomSite.id}"]`);
+      clickerAvatars.forEach((avatarEl) => {
+        const avatar = avatarEl as HTMLElement;
+        // Random position inside the iframe
+        const x = Math.random() * 80; // % from left
+        const y = Math.random() * 80; // % from top
+        
+        // Animate transition
+        avatar.style.transform = `translate(${-x}%, ${y}%)`;
+        avatar.style.backgroundColor = 'rgba(255, 0, 0, 0.8)';
+        avatar.style.boxShadow = '0 0 15px rgba(255, 0, 0, 0.8)';
+        
+        // Reset after animation
+        setTimeout(() => {
+          avatar.style.backgroundColor = 'rgba(255, 192, 0, 0.8)';
+          avatar.style.boxShadow = '0 0 10px rgba(255, 192, 0, 0.6)';
+        }, 1000);
+      });
       
       try {
         if (iframe && iframe.contentWindow) {
@@ -263,7 +380,7 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
             feedback.style.color = 'white';
             feedback.style.fontWeight = 'bold';
             feedback.style.zIndex = '9999';
-            feedback.textContent = 'Worker clicked!';
+            feedback.textContent = '🤖 AI Worker Clicked!';
             
             iframe.parentElement?.appendChild(feedback);
             
@@ -287,10 +404,51 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
       const randomSite = runningWebsites[Math.floor(Math.random() * runningWebsites.length)];
       const iframe = document.getElementById(randomSite.id) as HTMLIFrameElement;
       
+      // Animate the scroller avatar
+      const scrollerAvatars = document.querySelectorAll(`.ai-worker-avatar.scroller[data-website="${randomSite.id}"]`);
+      scrollerAvatars.forEach((avatarEl) => {
+        const avatar = avatarEl as HTMLElement;
+        // Random vertical position inside the iframe
+        const y = Math.random() * 80; // % from top
+        
+        // Animate transition
+        avatar.style.transform = `translateY(${y}%)`;
+        avatar.style.backgroundColor = 'rgba(0, 255, 120, 0.8)';
+        avatar.style.boxShadow = '0 0 15px rgba(0, 255, 120, 0.8)';
+        
+        // Reset after animation
+        setTimeout(() => {
+          avatar.style.backgroundColor = 'rgba(0, 120, 255, 0.8)';
+          avatar.style.boxShadow = '0 0 10px rgba(0, 120, 255, 0.6)';
+        }, 1000);
+      });
+      
       try {
         if (iframe && iframe.contentWindow) {
           // Scroll randomly
-          iframe.contentWindow.scrollBy(0, Math.random() > 0.5 ? 100 : -100);
+          const scrollY = Math.random() > 0.5 ? 100 : -100;
+          iframe.contentWindow.scrollBy(0, scrollY);
+          
+          // Show visual feedback (only sometimes)
+          if (Math.random() > 0.7) {
+            const feedback = document.createElement('div');
+            feedback.style.position = 'absolute';
+            feedback.style.top = '40%';
+            feedback.style.right = '10%';
+            feedback.style.background = 'rgba(0, 120, 255, 0.3)';
+            feedback.style.padding = '0.5rem';
+            feedback.style.borderRadius = '0.5rem';
+            feedback.style.color = 'white';
+            feedback.style.fontWeight = 'bold';
+            feedback.style.zIndex = '9999';
+            feedback.textContent = `🤖 AI Scrolling ${scrollY > 0 ? '⬇️' : '⬆️'}`;
+            
+            iframe.parentElement?.appendChild(feedback);
+            
+            setTimeout(() => {
+              feedback.remove();
+            }, 800);
+          }
         }
       } catch (error) {
         console.log('Cannot access iframe content due to same-origin policy restrictions');
@@ -302,6 +460,20 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
     // Cleanup function
     return () => {
       actionIntervals.forEach(interval => clearInterval(interval));
+      workerAvatars.forEach((avatarEl) => {
+        const avatar = avatarEl as HTMLElement;
+        if (avatar.parentElement) {
+          avatar.parentElement.removeChild(avatar);
+        }
+      });
+      
+      // Remove any remaining avatars
+      document.querySelectorAll('.ai-worker-avatar').forEach((avatarEl) => {
+        const avatar = avatarEl as HTMLElement;
+        if (avatar.parentElement) {
+          avatar.parentElement.removeChild(avatar);
+        }
+      });
     };
   }, [workersActive, openWebsites]);
   
@@ -327,7 +499,7 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
   
   // Find the position class for a website in the grid
   const getPositionClass = (position: WebsitePosition, state: WebsiteState) => {
-    if (state === 'minimized') return 'hidden';
+    if (state === 'minimized') return 'opacity-0 absolute top-0 left-0 w-0 h-0 overflow-hidden';
     
     switch(position) {
       case 'left': return 'col-start-1 row-span-full';
@@ -477,7 +649,9 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
             }}
             onLoad={() => handleIframeLoad(website.id)}
             onError={() => handleIframeError(website.id)}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-presentation allow-top-navigation"
+            allow="accelerometer; camera; encrypted-media; geolocation; gyroscope; microphone; midi; payment; vr"
+            referrerPolicy="no-referrer"
             title={`Website Preview - ${website.url}`}
           />
         </div>
