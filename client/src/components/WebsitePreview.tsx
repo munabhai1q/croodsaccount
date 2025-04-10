@@ -37,8 +37,26 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
   const [openWebsites, setOpenWebsites] = useState<OpenWebsite[]>([]);
   const [layout, setLayout] = useState<'grid' | 'stack'>('grid');
   const [showWorkerPanel, setShowWorkerPanel] = useState(false);
-  const [workersActive, setWorkersActive] = useState(false);
+  const [workersActive, setWorkersActive] = useState(() => {
+    // Load workers state from localStorage on initial render
+    const savedState = localStorage.getItem('workersActive');
+    return savedState === 'true';
+  });
   
+  // Load persisted websites from localStorage
+  useEffect(() => {
+    try {
+      const savedWebsites = localStorage.getItem('openWebsites');
+      if (savedWebsites) {
+        const parsedWebsites = JSON.parse(savedWebsites) as OpenWebsite[];
+        // Only load websites that are not minimized to avoid cluttering the screen on load
+        setOpenWebsites(parsedWebsites);
+      }
+    } catch (error) {
+      console.error('Failed to load websites from localStorage', error);
+    }
+  }, []);
+
   // Initialize with the provided URL when it changes
   useEffect(() => {
     if (url && !openWebsites.some(site => site.url === url)) {
@@ -83,11 +101,20 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
   
   // Update website state (running, paused, minimized)
   const updateState = (id: string, state: WebsiteState) => {
+    // Update the state of a website
     setOpenWebsites(prev => 
       prev.map(site => 
         site.id === id ? {...site, state} : site
       )
     );
+    
+    // Store in localStorage to persist state across tab changes
+    setTimeout(() => {
+      const websitesToStore = openWebsites.map(site => 
+        site.id === id ? {...site, state} : site
+      );
+      localStorage.setItem('openWebsites', JSON.stringify(websitesToStore));
+    }, 100);
   };
   
   // Remove a website from the display
@@ -102,7 +129,11 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
   
   // Generate rainbow-colored bubbles
   const [bubbles, setBubbles] = useState<{id: number; x: number; y: number; size: number; color: string; popped: boolean}[]>([]);
-  const [bubblesActive, setBubblesActive] = useState(false);
+  const [bubblesActive, setBubblesActive] = useState(() => {
+    // Load bubbles state from localStorage on initial render
+    const savedState = localStorage.getItem('bubblesActive');
+    return savedState === 'true';
+  });
   
   // Generate a new bubble every second when active
   useEffect(() => {
@@ -156,7 +187,40 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
   
   // Toggle simulated human workers
   const toggleWorkers = () => {
-    setWorkersActive(!workersActive);
+    const newState = !workersActive;
+    setWorkersActive(newState);
+    
+    // Save worker state to keep it active across tabs
+    localStorage.setItem('workersActive', newState ? 'true' : 'false');
+    
+    // Show toast notification
+    const feedback = document.createElement('div');
+    feedback.style.position = 'fixed';
+    feedback.style.bottom = '20px';
+    feedback.style.left = '50%';
+    feedback.style.transform = 'translateX(-50%)';
+    feedback.style.padding = '10px 20px';
+    feedback.style.background = 'rgba(0, 0, 0, 0.8)';
+    feedback.style.color = 'white';
+    feedback.style.borderRadius = '4px';
+    feedback.style.zIndex = '9999';
+    feedback.style.textAlign = 'center';
+    feedback.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
+    
+    if (newState) {
+      feedback.textContent = '🤖 AI Workers activated! They will interact with your websites.';
+    } else {
+      feedback.textContent = '🤖 AI Workers deactivated.';
+    }
+    
+    document.body.appendChild(feedback);
+    setTimeout(() => {
+      feedback.style.opacity = '0';
+      feedback.style.transition = 'opacity 0.5s ease';
+      setTimeout(() => {
+        document.body.removeChild(feedback);
+      }, 500);
+    }, 3000);
   };
   
   // Simulated workers that perform actions
@@ -471,7 +535,11 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
             size="sm"
             variant={bubblesActive ? "default" : "outline"}
             className={`bg-white/20 hover:bg-white/30 text-white ${bubblesActive ? 'border-white' : ''}`}
-            onClick={() => setBubblesActive(!bubblesActive)}
+            onClick={() => {
+              const newState = !bubblesActive;
+              setBubblesActive(newState);
+              localStorage.setItem('bubblesActive', newState ? 'true' : 'false');
+            }}
           >
             {bubblesActive ? 'Bubbles On!' : 'Generate Bubbles'}
           </Button>

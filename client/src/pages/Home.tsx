@@ -337,7 +337,7 @@ export default function Home() {
 
       {/* Tab navigation */}
       <TabBar 
-        tabs={tabs || []} 
+        tabs={Array.isArray(tabs) ? tabs : []} 
         activeTabId={activeTabId} 
         onTabChange={setActiveTabId} 
         isLoading={tabsLoading}
