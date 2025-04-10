@@ -208,21 +208,53 @@ export default function Home() {
               />
             ))}
 
-            {/* Add new section button */}
+            {/* Add new section button - with lightning/mirror design */}
             <div className="flex justify-center my-8">
               <Button
                 onClick={addNewSection}
-                className="px-8 py-6 rounded-full text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="px-8 py-6 rounded-full text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative overflow-hidden"
                 style={{
-                  backgroundImage: `
-                    linear-gradient(135deg, #F9A826 0%, #FFD166 100%),
-                    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 40%)
-                  `,
+                  background: 'linear-gradient(135deg, #000000 0%, #e50000 50%, #000000 100%)',
+                  border: '2px solid #0077ff',
                 }}
               >
-                <PlusIcon className="mr-2 h-6 w-6" /> Add New Section
+                {/* Lightning effect overlay */}
+                <div className="absolute inset-0 z-0 overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-full opacity-30" 
+                    style={{
+                      backgroundImage: 'linear-gradient(45deg, transparent 25%, #0077ff 25%, #0077ff 50%, transparent 50%, transparent 75%, #0077ff 75%, #0077ff 100%)',
+                      backgroundSize: '10px 10px',
+                      animation: 'moveBackground 3s linear infinite',
+                    }}
+                  ></div>
+                  <div className="absolute top-0 left-0 w-full h-full opacity-40"
+                    style={{
+                      background: 'radial-gradient(circle, rgba(255,255,255,0.8) 5%, rgba(0,119,255,0.4) 30%, transparent 70%)',
+                      transform: 'translateX(-50%)',
+                      animation: 'flashLight 5s ease-in-out infinite',
+                    }}
+                  ></div>
+                </div>
+
+                {/* Main content */}
+                <div className="relative z-10 flex items-center">
+                  <PlusIcon className="mr-2 h-6 w-6" /> Add New Section
+                </div>
               </Button>
             </div>
+            
+            {/* Add CSS animations */}
+            <style jsx>{`
+              @keyframes moveBackground {
+                0% { background-position: 0 0; }
+                100% { background-position: 50px 50px; }
+              }
+              
+              @keyframes flashLight {
+                0%, 100% { transform: translateX(-50%) translateY(-50%) scale(1); opacity: 0.4; }
+                50% { transform: translateX(100%) translateY(50%) scale(1.5); opacity: 0.6; }
+              }
+            `}</style>
           </>
         )}
       </main>
