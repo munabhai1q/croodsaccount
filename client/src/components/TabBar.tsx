@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, ImageIcon, ClockIcon, EditIcon, CheckIcon, X } from "lucide-react";
+import { PlusIcon, ImageIcon, ClockIcon, EditIcon, CheckIcon, X, ChevronUp, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";

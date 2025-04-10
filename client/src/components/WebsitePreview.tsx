@@ -645,12 +645,12 @@ export default function WebsitePreview({ url, onClose }: WebsitePreviewProps) {
             className="w-full h-full"
             style={{ 
               pointerEvents: website.state === 'running' ? 'auto' : 'none',
-              opacity: website.state === 'running' ? 1 : 0.7
+              opacity: website.state === 'running' ? 1 : 0.7,
+              background: '#ffffff'
             }}
             onLoad={() => handleIframeLoad(website.id)}
             onError={() => handleIframeError(website.id)}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-presentation allow-top-navigation"
-            allow="accelerometer; camera; encrypted-media; geolocation; gyroscope; microphone; midi; payment; vr"
+            allowFullScreen={true}
             referrerPolicy="no-referrer"
             title={`Website Preview - ${website.url}`}
           />

@@ -10,7 +10,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { PlusIcon, BookmarkIcon, Music, Bot, User } from "lucide-react";
+import { PlusIcon, BookmarkIcon, Music, Bot, User, ChevronUp, ChevronDown } from "lucide-react";
 import type { Tab, Bookmark, Section } from "@shared/schema";
 
 export default function Home() {
@@ -27,6 +27,9 @@ export default function Home() {
   
   // State for AI workers
   const [workersActive, setWorkersActive] = useState<boolean>(false);
+  
+  // State for header collapse
+  const [headerCollapsed, setHeaderCollapsed] = useState<boolean>(false);
   
   // Generate musical bubbles
   useEffect(() => {
@@ -268,7 +271,7 @@ export default function Home() {
       ))}
       
       {/* New cartoon theme banner at the very top */}
-      <div className="relative bg-gradient-to-r from-primary to-amber-500 py-2 text-white text-center z-10">
+      <div className={`relative bg-gradient-to-r from-primary to-amber-500 py-2 text-white text-center z-10 transition-all duration-300 ${headerCollapsed ? 'h-0 py-0 overflow-hidden' : ''}`}>
         <div className="container mx-auto px-4 flex items-center justify-center">
           <img 
             src="/attached_assets/10825231.jpg" 
@@ -279,17 +282,39 @@ export default function Home() {
         </div>
       </div>
       
-      <header className="relative z-10 bg-white dark:bg-gray-800 shadow-md px-6 py-4 flex justify-between items-center">
+      <header 
+        className={`relative z-10 bg-white dark:bg-gray-800 shadow-md px-6 transition-all duration-300 flex justify-between items-center
+                   ${headerCollapsed ? 'py-2 transform -translate-y-2' : 'py-4'}`}
+      >
         <div className="flex items-center space-x-2">
           <img 
             src="/attached_assets/10825231.jpg" 
             alt="Cartoon Bookmarker" 
-            className="w-10 h-10 rounded-full object-cover"
+            className={`rounded-full object-cover transition-all duration-300 ${headerCollapsed ? 'w-7 h-7' : 'w-10 h-10'}`}
           />
-          <h1 className="font-bold text-2xl text-primary">Cartoon Bookmarker</h1>
+          <h1 className={`font-bold text-primary transition-all duration-300 ${headerCollapsed ? 'text-xl' : 'text-2xl'}`}>
+            Cartoon Bookmarker
+          </h1>
         </div>
         
         <div className="flex space-x-3 items-center">
+          {/* Minimize/Expand Header Button */}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1 mr-2"
+            onClick={() => setHeaderCollapsed(!headerCollapsed)}
+          >
+            {headerCollapsed ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+            <span className={`text-xs ${headerCollapsed ? 'hidden' : 'block'}`}>
+              {headerCollapsed ? 'Expand' : 'Minimize'}
+            </span>
+          </Button>
+          
           {/* Musical Bubbles button */}
           <Button 
             variant={bubblesActive ? "default" : "outline"}
@@ -298,7 +323,7 @@ export default function Home() {
             onClick={() => setBubblesActive(!bubblesActive)}
           >
             <Music className="h-4 w-4" />
-            <span className="text-xs">Bubbles</span>
+            <span className={`text-xs ${headerCollapsed ? 'hidden' : 'block'}`}>Bubbles</span>
           </Button>
           
           {/* AI Workers button */}
@@ -309,7 +334,7 @@ export default function Home() {
             onClick={() => setWorkersActive(!workersActive)}
           >
             <User className="h-4 w-4" />
-            <span className="text-xs">Workers</span>
+            <span className={`text-xs ${headerCollapsed ? 'hidden' : 'block'}`}>Workers</span>
           </Button>
           
           <ThemeToggle />
@@ -321,7 +346,7 @@ export default function Home() {
             className="flex items-center space-x-2"
             onClick={toggleAutoRun}
           >
-            <span className="text-sm">Auto</span>
+            <span className={`text-sm ${headerCollapsed ? 'hidden' : 'block'}`}>Auto</span>
             <div className="relative w-8 h-4 bg-gray-300 dark:bg-gray-600 rounded-full">
               <div 
                 className={`absolute top-0 w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
