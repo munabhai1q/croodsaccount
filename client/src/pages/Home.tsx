@@ -142,8 +142,30 @@ export default function Home() {
       }, {})
     : {};
 
+  // Get the active tab for background image
+  const activeTab = tabs && Array.isArray(tabs) ? tabs.find((tab: Tab) => tab.id === activeTabId) : undefined;
+  const backgroundImage = activeTab?.backgroundImage || "/attached_assets/10825231.jpg";
+
   return (
     <div className="h-full flex flex-col">
+      {/* Background image overlay */}
+      <div 
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-25 z-0" 
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+      />
+      
+      {/* New cartoon theme banner at the very top */}
+      <div className="relative bg-gradient-to-r from-primary to-amber-500 py-2 text-white text-center z-10">
+        <div className="container mx-auto px-4 flex items-center justify-center">
+          <img 
+            src="/attached_assets/10825231.jpg" 
+            alt="The Croods" 
+            className="h-8 w-8 rounded-full mr-2 object-cover border-2 border-white"
+          />
+          <span className="font-bold">Welcome to The Croods Cartoon Bookmarker!</span>
+        </div>
+      </div>
+      
       <header className="relative z-10 bg-white dark:bg-gray-800 shadow-md px-6 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <img 
@@ -244,17 +266,21 @@ export default function Home() {
             </div>
             
             {/* Add CSS animations */}
-            <style jsx>{`
-              @keyframes moveBackground {
-                0% { background-position: 0 0; }
-                100% { background-position: 50px 50px; }
-              }
-              
-              @keyframes flashLight {
-                0%, 100% { transform: translateX(-50%) translateY(-50%) scale(1); opacity: 0.4; }
-                50% { transform: translateX(100%) translateY(50%) scale(1.5); opacity: 0.6; }
-              }
-            `}</style>
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `
+                  @keyframes moveBackground {
+                    0% { background-position: 0 0; }
+                    100% { background-position: 50px 50px; }
+                  }
+                  
+                  @keyframes flashLight {
+                    0%, 100% { transform: translateX(-50%) translateY(-50%) scale(1); opacity: 0.4; }
+                    50% { transform: translateX(100%) translateY(50%) scale(1.5); opacity: 0.6; }
+                  }
+                `
+              }}
+            />
           </>
         )}
       </main>

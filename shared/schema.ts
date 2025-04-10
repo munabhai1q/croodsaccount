@@ -7,11 +7,15 @@ export const tabs = pgTable("tabs", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   order: integer("order").notNull(),
+  backgroundImage: text("background_image"),
+  autoSwitch: boolean("auto_switch").default(false),
 });
 
 export const insertTabSchema = createInsertSchema(tabs).pick({
   name: true,
   order: true,
+  backgroundImage: true,
+  autoSwitch: true,
 });
 
 // Bookmark Schema
