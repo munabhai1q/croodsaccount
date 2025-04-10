@@ -90,12 +90,15 @@ export default function BookmarkCard({
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleOpenBookmark}
-          className="bookmark-card block p-4 rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-lg dark:text-white border-l-4"
-          style={{ borderLeftColor: sectionColor }}
+          className="bookmark-card block p-4 rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-xl dark:text-white border-l-4 transition-all duration-200 hover:scale-105"
+          style={{ 
+            borderLeftColor: sectionColor,
+            backgroundImage: `linear-gradient(to right, ${sectionColor}10, transparent)`
+          }}
         >
           <div className="flex items-center mb-2">
             <img 
-              src={bookmark.favicon} 
+              src={typeof bookmark.favicon === 'string' ? bookmark.favicon : ''}
               alt={bookmark.title} 
               className="w-6 h-6 mr-2"
               onError={(e) => {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import TabBar from "@/components/TabBar";
 import SearchBar from "@/components/SearchBar";
 import BookmarkSection from "@/components/BookmarkSection";
@@ -56,8 +57,8 @@ export default function Home() {
 
   // Set auto-run from settings
   useEffect(() => {
-    if (settings) {
-      setAutoRunEnabled(settings.autoRun);
+    if (settings && typeof settings === 'object' && 'autoRun' in settings) {
+      setAutoRunEnabled(!!settings.autoRun);
     }
   }, [settings]);
 
@@ -211,9 +212,15 @@ export default function Home() {
             <div className="flex justify-center my-8">
               <Button
                 onClick={addNewSection}
-                className="watercolor-effect px-6 py-6 rounded-full bg-gradient-to-r from-primary to-secondary text-white font-bold text-lg shadow-lg hover:shadow-xl transition-shadow duration-200"
+                className="px-8 py-6 rounded-full text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(135deg, #F9A826 0%, #FFD166 100%),
+                    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 40%)
+                  `,
+                }}
               >
-                <PlusIcon className="mr-2 h-5 w-5" /> Add New Section
+                <PlusIcon className="mr-2 h-6 w-6" /> Add New Section
               </Button>
             </div>
           </>
@@ -224,7 +231,13 @@ export default function Home() {
       <div className="fixed bottom-6 right-6 z-20">
         <Button
           onClick={() => setAddingBookmark(true)}
-          className="w-14 h-14 rounded-full bg-primary text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:bg-opacity-90 hover:scale-105"
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-primary to-amber-500 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110"
+          style={{
+            backgroundImage: `
+              linear-gradient(135deg, #F9A826 0%, #FFD166 100%),
+              radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 40%)
+            `,
+          }}
         >
           <BookmarkIcon className="h-6 w-6" />
         </Button>
