@@ -36,10 +36,9 @@ export default function BookmarkCard({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleOpenBookmark = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    if (!autoRunEnabled) {
-      e.preventDefault();
-      onPreviewWebsite(bookmark.url);
-    }
+    // Always prevent default behavior to show in the app
+    e.preventDefault();
+    onPreviewWebsite(bookmark.url);
   };
 
   const handleDelete = async () => {

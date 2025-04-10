@@ -80,33 +80,45 @@ export default function BookmarkSection({
     }
   };
 
-  // Generate watercolor effect style
-  const watercolorStyle = {
+  // Generate fancy gradient style
+  const sectionGradientStyle = {
     backgroundImage: `
-      radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 40%),
-      radial-gradient(circle at 60% 70%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 30%)
+      linear-gradient(135deg, ${section.color}40 0%, ${section.color}15 100%),
+      radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 50%),
+      radial-gradient(circle at 60% 70%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 40%)
     `,
+    borderColor: section.color,
     filter: 'saturate(1.2)',
+  };
+
+  const buttonStyle = {
     backgroundColor: section.color,
+    backgroundImage: `
+      radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 40%)
+    `,
   };
 
   return (
-    <section className="mb-8">
+    <section className="mb-8 rounded-lg p-5 border-l-4 shadow-md" style={sectionGradientStyle}>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="font-bold text-xl text-gray-800 dark:text-white">{section.name}</h2>
+        <h2 className="font-bold text-xl text-gray-800 dark:text-white flex items-center">
+          <div className="w-4 h-4 rounded-full mr-2" style={{backgroundColor: section.color}}></div>
+          {section.name}
+        </h2>
         <div className="flex gap-2">
           <Button
             onClick={() => setIsEditing(true)}
-            className="watercolor-effect px-3 py-1 rounded-full text-white font-medium text-sm shadow-md hover:shadow-lg transition-shadow duration-200"
-            style={watercolorStyle}
+            className="px-4 py-1 rounded-full text-white font-medium text-sm shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+            style={buttonStyle}
           >
-            Manage
+            <Edit2Icon className="h-4 w-4 mr-1" />
+            Edit
           </Button>
           <Button
             variant="outline"
             size="icon"
             onClick={() => setIsDeleting(true)}
-            className="rounded-full"
+            className="rounded-full hover:bg-red-50 hover:text-red-500 hover:border-red-200"
           >
             <Trash2Icon className="h-4 w-4" />
           </Button>
@@ -125,7 +137,7 @@ export default function BookmarkSection({
         ))}
         
         {bookmarks.length === 0 && (
-          <Card className="col-span-full p-6 flex justify-center items-center text-gray-500 bg-gray-100 dark:bg-gray-800 border-dashed border-2">
+          <Card className="col-span-full p-6 flex justify-center items-center text-gray-500 bg-white/60 dark:bg-gray-800/60 border-dashed border-2 border-gray-300 dark:border-gray-700">
             <p>No bookmarks in this section yet. Add your first bookmark!</p>
           </Card>
         )}

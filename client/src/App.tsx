@@ -51,7 +51,7 @@ function App() {
         <div className="h-screen overflow-hidden">
           {/* Background overlay with Croods theme - visible in all tabs */}
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-10 dark:opacity-5 pointer-events-none z-0"
+            className="absolute inset-0 bg-cover bg-center opacity-20 dark:opacity-10 pointer-events-none z-0"
             style={{ backgroundImage: "url('/attached_assets/10825231.jpg')" }}
           />
           <Router />
